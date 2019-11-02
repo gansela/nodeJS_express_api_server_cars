@@ -6,7 +6,7 @@ const api = express()
 
 const port = 1711
 
-api.listen(port, (err) =>{
+api.listen(port, (err) => {
     if (err) console.log("no good")
     console.log("server running")
 })
@@ -14,9 +14,16 @@ api.listen(port, (err) =>{
 api.get("/cars", (req, res, next) => {
     const date = new Date();
     const timeNow = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
-    const logTxt =`url: ${req.get("host")}${req.originalUrl} time: ${timeNow} ` 
+    const logTxt = `url: ${req.get("host")}${req.originalUrl} time: ${timeNow} `
     logger.writeToFileSync("./log.txt", logTxt)
-    return res.send(cars)
+
+    const { model } = req.query;
+    if (!model) return res.send(cars)
+    const searchedCars = cars.filter((car) => {
+        return car.Name.includes(model.toLowerCase())
+    })
+    if (!searchedCars[0]) return res.send(null)
+    else res.send(searchedCars)
 })
 
 api.get("/logs", (req, res, next) => {
